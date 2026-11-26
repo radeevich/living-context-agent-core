@@ -1,4 +1,5 @@
 import os
+import warnings
 from pathlib import Path
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 
@@ -23,12 +24,28 @@ def create_app(memory_dir: Path | None = None, api_key: str | None = None) -> Fa
             "Hydration (INDEX.md + STATE.json), atomic Doc Steward versioning, and "
             "least-privilege dynamic agent spawning."
         ),
-        version="1.0.0",
+        version="1.1.0",
     )
 
     root_path = memory_dir or Path(os.getenv("MEMORY_ROOT", "./workspace_memory"))
-    expected_key = api_key if api_key is not None else os.getenv("CORE_API_KEY", "dev-secret-key")
+    
+    # Production security validation
+    env = os.getenv("ENV", os.getenv("ENVIRONMENT", "development")).lower()
+    raw_key = api_key if api_key is not None else os.getenv("CORE_API_KEY")
+    if not raw_key:
+        if env in ("production", "prod", "stage", "staging"):
+            raise RuntimeError(
+                "CRITICAL SECURITY CONFIGURATION ERROR: CORE_API_KEY environment variable is "
+                "strictly required in production mode. Refusing to boot with default secrets."
+            )
+        raw_key = "dev-secret-key"
+        warnings.warn(
+            "CORE_API_KEY not configured. Running with insecure fallback 'dev-secret-key' in development mode.",
+            UserWarning,
+            stacklevel=2,
+        )
 
+    expected_key = raw_key
     store = LivingMemoryStore(root_path)
     factory = AgentRegistryAndFactory()
 
@@ -41,7 +58,12 @@ def create_app(memory_dir: Path | None = None, api_key: str | None = None) -> Fa
 
     @app.get("/health")
     async def health():
-        return {"status": "ok", "service": "living-context-agent-core"}
+        return {
+            "status": "ok",
+            "service": "living-context-agent-core",
+            "environment": env,
+            "atomic_storage": True,
+        }
 
     @app.post(
         "/v1/context/hydrate",

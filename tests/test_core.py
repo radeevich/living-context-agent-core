@@ -167,3 +167,11 @@ def test_agent_registry_reuse_vs_least_privilege_spawn(client):
         },
     )
     assert danger_res.status_code == 403
+
+def test_production_mode_refuses_default_secret(monkeypatch):
+    import pytest
+    from app.main import create_app
+    monkeypatch.setenv("ENV", "production")
+    monkeypatch.delenv("CORE_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="CRITICAL SECURITY CONFIGURATION ERROR"):
+        create_app(api_key=None)
