@@ -56,3 +56,14 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 Интерактивная документация Swagger доступна после старта по адресу: `http://localhost:8000/docs`.
+
+---
+
+## 👨‍💻 Архитектор и коммерческая разработка
+
+**Юрий Радеевич** — Telegram-инженер & Fullstack Архитектор автономных систем продаж (FastAPI + React).
+
+- 🌐 Официальный сайт: [radeevich.ru](https://radeevich.ru)
+- 💬 Личный Telegram: [@radeevich](https://t.me/radeevich)
+- 📱 Telegram Mini App Шоурум: [t.me/radeevich_bot/app](https://t.me/radeevich_bot/app)
+- 📄 B2B Презентация решений (PDF): [radeevich.ru/radeevich_solutions_profile.pdf](https://radeevich.ru/radeevich_solutions_profile.pdf)
